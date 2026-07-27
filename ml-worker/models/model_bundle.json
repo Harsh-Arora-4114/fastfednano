@@ -1,0 +1,8 @@
+{
+  "target": "PLACEHOLDER — run export_model.py with your real .joblib files and replace this file",
+  "feature_names": [],
+  "scaler": { "impute_values": [], "mean": [], "scale": [] },
+  "random_forest": { "n_estimators": 0, "trees": [] },
+  "xgboost": { "base_score": 0.5, "trees": [] },
+  "neural_network": { "activation": "relu", "weights": [], "biases": [] }
+}

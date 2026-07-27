@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FAST-FedNano | Formulation Predictor</title>
+<style>
+  :root{
+    --bg: #0b1210;
+    --panel: #101a17;
+    --line: #1f302a;
+    --text: #dfe9e4;
+    --muted: #7d968c;
+    --accent: #4fd1a5;
+    --accent-dim: #235c48;
+    --warn: #e0a458;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+    min-height:100vh;
+  }
+  header{
+    padding:28px 32px 20px; border-bottom:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px;
+  }
+  header h1{
+    font-family: var(--mono); font-size:20px; letter-spacing:0.5px; margin:0; color:var(--accent);
+  }
+  header p{margin:2px 0 0; color:var(--muted); font-size:13px;}
+  .badge{font-family:var(--mono); font-size:11px; color:var(--warn); border:1px solid var(--warn); padding:2px 8px; border-radius:2px;}
+  main{ max-width:1100px; margin:0 auto; padding:32px; display:grid; grid-template-columns: 1.1fr 0.9fr; gap:28px;}
+  @media (max-width:900px){ main{grid-template-columns:1fr;} }
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:24px;}
+  .panel h2{font-size:13px; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); margin:0 0 16px;}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  label{display:block; font-size:11px; color:var(--muted); margin-bottom:4px; font-family:var(--mono);}
+  input{
+    width:100%; background:#0e1613; border:1px solid var(--line); color:var(--text);
+    padding:8px 10px; border-radius:4px; font-family:var(--mono); font-size:13px;
+  }
+  input:focus{outline:none; border-color:var(--accent);}
+  button{
+    margin-top:20px; width:100%; background:var(--accent); color:#06120d; border:none;
+    padding:12px; font-weight:600; font-family:var(--mono); letter-spacing:0.5px;
+    border-radius:4px; cursor:pointer; font-size:13px; text-transform:uppercase;
+  }
+  button:hover{background:#65e0b6;}
+  button:disabled{background:var(--accent-dim); cursor:wait;}
+  .result-row{
+    display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line);
+    font-family:var(--mono); font-size:13px;
+  }
+  .result-row:last-child{border-bottom:none;}
+  .result-row .val{color:var(--accent); font-weight:600;}
+  .ensemble{
+    margin-top:14px; padding:16px; background:#0e1613; border:1px solid var(--accent-dim); border-radius:4px;
+    text-align:center;
+  }
+  .ensemble .num{font-size:32px; color:var(--accent); font-family:var(--mono); font-weight:700;}
+  .ensemble .lbl{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:4px;}
+  .status{font-size:12px; color:var(--muted); margin-top:12px; min-height:16px; font-family:var(--mono);}
+  .status.error{color:#e07a5f;}
+  footer{text-align:center; padding:24px; color:var(--muted); font-size:11px; font-family:var(--mono);}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>FAST-FedNano</h1>
+    <p>Formulation → Encapsulation Efficiency Predictor</p>
+  </div>
+  <span class="badge">RF · XGB · MLP ensemble</span>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>Formulation Parameters</h2>
+    <div id="form" class="grid"></div>
+    <button id="predictBtn">Run Prediction</button>
+    <div id="status" class="status"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Predicted Encapsulation Efficiency</h2>
+    <div id="results"></div>
+    <div class="ensemble" id="ensembleBox" style="display:none;">
+      <div class="num" id="ensembleVal">--</div>
+      <div class="lbl">Ensemble mean (%)</div>
+    </div>
+  </section>
+</main>
+
+<footer>FAST-FedNano — Federated Multi-Objective Nanoparticle Formulation Engine</footer>
+
+<script>
+  // Point this at your deployed Cloud Run backend URL.
+  const API_BASE = window.location.hostname === "localhost"
+    ? "http://localhost:8787"
+    : "https://fastfednano-ml-worker.YOUR-SUBDOMAIN.workers.dev";
+
+  const FIELDS = [
+    { key: "polymer_MW", label: "polymer_MW (kDa)", default: 20 },
+    { key: "LA/GA", label: "LA/GA ratio", default: 1.0 },
+    { key: "mol_MW", label: "mol_MW", default: 300 },
+    { key: "mol_logP", label: "mol_logP", default: 2.5 },
+    { key: "mol_TPSA", label: "mol_TPSA", default: 60 },
+    { key: "mol_melting_point", label: "mol_melting_point (°C)", default: 150 },
+    { key: "mol_Hacceptors", label: "mol_Hacceptors", default: 4 },
+    { key: "mol_Hdonors", label: "mol_Hdonors", default: 1 },
+    { key: "mol_heteroatoms", label: "mol_heteroatoms", default: 5 },
+    { key: "drug/polymer", label: "drug/polymer ratio", default: 0.3 },
+    { key: "surfactant_concentration", label: "surfactant_concentration (%)", default: 1.0 },
+    { key: "surfactant_HLB", label: "surfactant_HLB", default: 13 },
+    { key: "aqueous/organic", label: "aqueous/organic ratio", default: 5 },
+    { key: "pH", label: "pH", default: 7.0 },
+    { key: "solvent_polarity_index", label: "solvent_polarity_index", default: 4.0 },
+  ];
+
+  const formEl = document.getElementById("form");
+  FIELDS.forEach(f => {
+    const wrap = document.createElement("div");
+    wrap.innerHTML = `<label>${f.label}</label><input type="number" step="any" id="f_${cssId(f.key)}" value="${f.default}">`;
+    formEl.appendChild(wrap);
+  });
+
+  function cssId(key){ return key.replace(/[^a-zA-Z0-9]/g, "_"); }
+
+  document.getElementById("predictBtn").addEventListener("click", runPrediction);
+
+  async function runPrediction(){
+    const btn = document.getElementById("predictBtn");
+    const status = document.getElementById("status");
+    btn.disabled = true;
+    status.textContent = "Running inference...";
+    status.className = "status";
+
+    const payload = {};
+    FIELDS.forEach(f => {
+      payload[f.key] = parseFloat(document.getElementById(`f_${cssId(f.key)}`).value);
+    });
+
+    try {
+      const res = await fetch(`${API_BASE}/predict`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`API error ${res.status}`);
+      const data = await res.json();
+      renderResults(data);
+      status.textContent = `Done.`;
+    } catch (err) {
+      status.textContent = `Error: ${err.message}. Check API_BASE URL / backend logs.`;
+      status.className = "status error";
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function renderResults(data){
+    const box = document.getElementById("results");
+    box.innerHTML = "";
+    Object.entries(data.predictions).forEach(([model, val]) => {
+      const row = document.createElement("div");
+      row.className = "result-row";
+      row.innerHTML = `<span>${model.replace(/_/g," ")}</span><span class="val">${val.toFixed(2)}%</span>`;
+      box.appendChild(row);
+    });
+    document.getElementById("ensembleBox").style.display = "block";
+    document.getElementById("ensembleVal").textContent = data.ensemble_mean.toFixed(2) + "%";
+  }
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+name = "fastfednano-ml-worker"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+
+# JSON imports (model_bundle.json) work out of the box with esbuild,
+# which Wrangler uses by default — no extra config needed.
+
+[observability]
+enabled = true
