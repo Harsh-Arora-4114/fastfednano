@@ -489,5 +489,5 @@ This project is licensed under the MIT License.
 
 # Author
 
-**Harsh Arora**
+**Developed by Harsh Arora**
 
