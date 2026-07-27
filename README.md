@@ -1,157 +1,493 @@
-# FAST-FedNano — Frontend on Vercel, ML Model on Cloudflare Workers
+# FAST-FedNano: Privacy-Preserving Federated Learning for Intelligent Nanoparticle Drug Delivery
 
-## Ye kaise kaam karta hai
+## Overview
 
-Cloudflare Workers Python (sklearn/xgboost) nahi chala sakte — isliye
-tere trained models ke **raw numbers** (RF ke trees, XGBoost ke trees,
-Neural Net ke weights, StandardScaler ke mean/scale) ko ek JSON file mein
-nikaal ke, Cloudflare Worker ke andar **pure JavaScript** mein prediction
-math likh diya hai. Koi Python runtime chahiye hi nahi at request time —
-bas number-crunching, jo Workers bahut fast karte hain (edge compute).
+FAST-FedNano is an AI framework that uses privacy-preserving Federated Learning to predict the results of nanoparticle drug formulations without having to disclose sensitive pharmaceutical data from the involved institutions.
+
+It explores whether it is possible for several simulated pharmaceutical labs (hospitals) to train a good quality machine learning algorithm by using their data without violating their privacy through Federated Learning (FL) and Differential Privacy (DP).
+
+The FAST-FedNano framework is a combination of centralized machine learning, federated learning, privacy-preserving optimization, and multi-objective formulation optimization.
+
+The system integrates:
+
+* Federated Learning with Flower (FedAvg)
+* Differential Privacy with Opacus (DP-SGD)
+* Machine Learning with Scikit-learn, XGBoost, and PyTorch
+* Multi-objective Optimization with NSGA-II (pymoo)
+* Cloudflare Worker to host the model
+* HTML, CSS, JavaScript-based Prediction Interface
+
+The framework allows researchers to:
+
+* Predict nanoparticle encapsulation efficiency
+* Study the performance of centralized and federated learning
+* Explore the privacy and utility tradeoff
+* Optimize nanoparticle formulations with artificial intelligence
+* Deploy models via a web app
+
+---
+
+# Objectives
+
+* Develop a privacy preserving machine learning system for nanoparticle formulation prediction
+* Evaluate the performance of centralized and federated learning
+* Protect the client’s data with the use of Differential Privacy
+* Develop simulation Non-IID pharmaceutical institutions
+* Optimize nanoparticle formulations using multi-objective optimization
+* Deploy the trained models using a light-weight inference web application
+
+---
+
+# Key Features
+
+## Centralized Machine Learning
+
+* Data preprocessing pipeline
+* Random Forest
+* XGBoost
+* Multi-Layer Perceptron (MLP)
+* Hyperparameter tuning using RandomizedSearchCV
+* Cross-validation performance evaluation
+
+---
+
+## Federated Learning
+
+* Flower (FedAvg)
+* Five simulated pharmaceutical clients
+* Non-IID data partitioning
+* Local training with weighted aggregation
+* Communication round evaluation
+
+---
+
+## Differential Privacy
+
+* DP-SGD using Opacus
+* Configurable privacy budget (ε)
+* Privacy–utility trade-off analysis
+* Secure local model updates
+
+---
+
+## Multi-objective Optimization
+
+* NSGA-II optimization
+* Pareto-optimal formulation discovery
+* Simultaneous optimization of:
+
+  * Encapsulation Efficiency
+  * Loading Capacity
+  * Particle Size
+
+---
+
+## Web Deployment
+
+* Cloudflare Workers
+* Lightweight inference API
+* Interactive web interface
+* Portable JSON model bundle
+
+---
+
+## Model Comparison
+
+Performance comparison between:
+
+* Centralized models
+* Federated models
+* Differentially Private Federated models
+
+---
+
+# Technologies Used
+
+| Category             | Tools / Libraries     |
+| -------------------- | --------------------- |
+| Programming Language | Python                |
+| Machine Learning     | Scikit-learn          |
+| Gradient Boosting    | XGBoost               |
+| Deep Learning        | PyTorch               |
+| Federated Learning   | Flower                |
+| Differential Privacy | Opacus                |
+| Optimization         | pymoo (NSGA-II)       |
+| Data Processing      | Pandas, NumPy         |
+| Visualization        | Matplotlib            |
+| Model Serialization  | Joblib                |
+| Deployment           | Cloudflare Workers    |
+| Frontend             | HTML, CSS, JavaScript |
+
+---
+
+# Project Architecture
+
+## 1. Data Preparation
+
+* Load nanoparticle formulation dataset
+* Missing value imputation
+* Feature scaling
+* Train-test split
+
+---
+
+## 2. Centralized Learning
+
+Train multiple machine learning models:
+
+* Random Forest
+* XGBoost
+* Neural Network (MLP)
+
+Evaluate baseline performance.
+
+---
+
+## 3. Non-IID Client Partitioning
+
+* Simulate five pharmaceutical laboratories
+* Dirichlet distribution partitioning
+* Realistic heterogeneous datasets
+
+---
+
+## 4. Federated Learning
+
+Each client:
+
+* Trains local model
+* Sends model weights
+* FedAvg aggregates weights
+* Updates global model
+
+---
+
+## 5. Differential Privacy
+
+Local training uses:
+
+* DP-SGD
+* Gradient clipping
+* Noise injection
+* Privacy budget tracking
+
+---
+
+## 6. Multi-objective Optimization
+
+NSGA-II searches formulation parameters to:
+
+* Maximize Encapsulation Efficiency
+* Maximize Loading Capacity
+* Minimize Particle Size
+
+---
+
+## 7. Deployment
+
+Export trained models into
 
 ```
-fastfednano/
-├── export_model.py           # LOCAL par chalao — .joblib -> model_bundle.json
-├── ml-worker/                  # Cloudflare Worker (pure JS ML inference)
-│   ├── src/index.js             # /predict, /health — RF + XGB + NN sab JS mein
-│   ├── models/model_bundle.json # <-- export_model.py ka output yahan aayega
-│   ├── wrangler.toml
-│   └── package.json
-└── frontend/
-    ├── index.html                # Vercel par deploy hoga
-    └── vercel.json
+model_bundle.json
+```
+
+Deploy using
+
+* Cloudflare Worker
+* Interactive Web UI
+
+---
+
+# Dataset
+
+**Dataset Source**
+
+Mendeley PLGA Nanoparticle Formulation Dataset
+
+Dataset contains:
+
+* 433 experimental samples
+* 15 numerical features
+
+Target variables:
+
+* Particle Size
+* Encapsulation Efficiency (Primary Target)
+* Loading Capacity
+
+Feature categories:
+
+Drug descriptors
+
+* Molecular Weight
+* LogP
+* TPSA
+* Melting Point
+* Hydrogen Bond Acceptors
+* Hydrogen Bond Donors
+
+Formulation parameters
+
+* Polymer Molecular Weight
+* LA/GA Ratio
+* Drug/Polymer Ratio
+* Surfactant Concentration
+* HLB
+* pH
+* Solvent Polarity
+
+---
+
+# Experimental Pipeline
+
+## Phase 1
+
+Centralized Machine Learning
+
+* Data preprocessing
+* Feature scaling
+* Hyperparameter tuning
+* Model comparison
+
+---
+
+## Phase 2
+
+Non-IID Client Simulation
+
+* Dirichlet partitioning
+* Five clients
+* Heterogeneous data distribution
+
+---
+
+## Phase 3
+
+In-Silico Simulation Engine
+
+* Synthetic formulation generation
+* Dataset augmentation
+
+---
+
+## Phase 4
+
+Federated Learning
+
+* Flower
+* FedAvg
+* Global model aggregation
+
+---
+
+## Phase 5
+
+Differential Privacy
+
+* DP-SGD
+* Privacy budget evaluation
+* Accuracy comparison
+
+---
+
+## Phase 6
+
+Formulation Optimization
+
+* NSGA-II
+* Pareto front generation
+* Recommended nanoparticle formulations
+
+---
+
+# Results Summary
+
+| Model              | Training Strategy | Test R²                  |
+| ------------------ | ----------------- | ------------------------ |
+| XGBoost            | Centralized       | **0.638**                |
+| Random Forest      | Centralized       | **0.631**                |
+| Federated MLP      | FedAvg            | **0.467**                |
+| Centralized MLP    | Centralized       | **0.450**                |
+| Federated MLP + DP | DP-SGD            | Privacy-Utility Analysis |
+
+Key observations:
+
+* Tree-based methods are better than neural networks for small table-like datasets.
+* Federated Learning performs equally well without requiring data to be shared.
+* Differential Privacy offers good privacy assurances without compromising on accuracy too much.
+* Federated averaging slightly boosts the generalization ability of neural networks.
+
+---
+
+# Repository Structure
+
+```
+FAST-FedNano/
+
+├── data_preprocessing.py
+├── train_model_improved.py
+├── partition_clients.py
+├── federated_learning.py
+├── federated_dp_opacus.py
+├── phase6_nsga2_optimization.py
+├── export_model.py
+├── predict_new.py
+├── predict_batch.py
+├── clients/
+├── federated_outputs/
+├── phase6_outputs/
+├── ml-worker/
+├── frontend/
+├── README.md
 ```
 
 ---
 
-## Step 0 — Models ko JSON mein export karo (apne local machine par)
+# How to Run
 
-Apne asli `.joblib` files ke folder mein `export_model.py` copy karo aur:
+## Clone Repository
 
 ```bash
-pip install scikit-learn xgboost joblib numpy --break-system-packages
+git clone https://github.com/yourusername/FAST-FedNano.git
+
+cd FAST-FedNano
+```
+
+---
+
+## Install Dependencies
+
+```bash
+python -m venv .venv
+
+source .venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+---
+
+## Run Centralized Training
+
+```bash
+python data_preprocessing.py
+
+python train_model_improved.py
+```
+
+---
+
+## Partition Clients
+
+```bash
+python partition_clients.py
+```
+
+---
+
+## Run Federated Learning
+
+```bash
+python federated_learning.py
+```
+
+---
+
+## Run Differential Privacy Training
+
+```bash
+python federated_dp_opacus.py
+```
+
+---
+
+## Run Optimization
+
+```bash
+python phase6_nsga2_optimization.py
+```
+
+---
+
+## Export Models
+
+```bash
 python export_model.py
 ```
 
-Ye `model_bundle.json` banayega. Isko copy karo:
-```
-ml-worker/models/model_bundle.json   (placeholder file ko replace karo)
-```
-
-**Important**: script kuch WARNING print kar sakta hai (agar tera
-preprocessor mein categorical columns hain, ya XGBoost ka objective
-`reg:squarederror` nahi hai, ya NN activation `relu` nahi hai) — agar
-koi warning aaye to mujhe bata dena, main JS inference usi hisaab se
-adjust kar dunga. Bina real files dekhe main ye guarantee nahi kar
-sakta ki edge cases sab cover hain.
-
 ---
 
-## Step 1 — Cloudflare Worker deploy karo
-
-Iske liye Wrangler CLI use karna padega (JSON bundle ko Worker ke saath
-package karne ke liye — sirf dashboard se ye possible nahi hai, but baaki
-sab kaam CLI khud Cloudflare console/account se hi connect karke karta hai).
+## Deploy Cloudflare Worker
 
 ```bash
 cd ml-worker
-npm install
-npx wrangler login       # ye browser kholega, Cloudflare account se login karo
-npx wrangler deploy
+
+wrangler deploy
 ```
 
-Deploy hone ke baad terminal mein URL milega, jaisे:
-```
-https://fastfednano-ml-worker.<your-subdomain>.workers.dev
-```
+---
 
-Test karo:
+## Run Frontend
+
 ```bash
-curl https://fastfednano-ml-worker.<your-subdomain>.workers.dev/health
+cd frontend
+
+python -m http.server 8000
 ```
 
-**Dashboard se verify/manage**: https://dash.cloudflare.com → **Workers &
-Pages** → tera `fastfednano-ml-worker` project dikh jaayega — yahan se
-logs, custom domain, analytics sab manage kar sakta hai (deploy CLI se
-hua, but manage dashboard se bhi hota hai).
+Open
 
----
-
-## Step 2 — Frontend deploy karo (Vercel Console)
-
-1. `frontend/index.html` mein Worker URL update karo:
-   ```js
-   const API_BASE = ... "https://fastfednano-ml-worker.<your-subdomain>.workers.dev";
-   ```
-2. Poore project (`fastfednano/`) ko GitHub par push karo:
-   ```bash
-   cd fastfednano
-   git init && git add . && git commit -m "FAST-FedNano: Vercel + Cloudflare Worker"
-   git remote add origin https://github.com/<your-username>/fastfednano.git
-   git branch -M main && git push -u origin main
-   ```
-3. https://vercel.com par jaake sign up/login karo (GitHub se login sabse
-   aasan hai).
-4. Dashboard → **Add New** → **Project** → apna `fastfednano` repo
-   **Import** karo.
-5. Configure screen par:
-   - **Root Directory**: `frontend` (Edit button se select karo)
-   - **Framework Preset**: **Other**
-   - Build/Output settings — khaali chhod do, static HTML hai
-6. **Deploy** click karo. 1 minute mein live ho jaayega:
-   `https://fastfednano.vercel.app`
-
----
-
-## Step 3 — CORS lock karo (production ke liye)
-
-Abhi `ml-worker/src/index.js` mein CORS `"*"` (sab origins allow) pe hai,
-taaki testing aasan ho. Jab Vercel URL final ho jaaye, to:
-
-```js
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "https://fastfednano.vercel.app",
-  ...
-};
 ```
-badal ke phir se `npx wrangler deploy` chala do.
+http://localhost:8000
+```
 
 ---
 
-## Step 4 (optional) — Apna custom domain
+# Future Scope
 
-- **Cloudflare Worker** ko custom subdomain dena ho (e.g. `api.fastfednano.com`):
-  Cloudflare dashboard → tera Worker → **Settings → Domains & Routes** →
-  **Add Custom Domain** → domain daalo (agar domain already Cloudflare
-  mein hai to ek click mein ho jaata hai).
-- **Vercel frontend** ko custom domain dena ho: Vercel project →
-  **Settings → Domains** → apna domain add karo → Vercel DNS instructions
-  dikha dega (ya agar domain Cloudflare pe hai, to bas CNAME record daal do).
-
----
-
-## Cost check (₹0/month)
-
-| Resource | Free tier | Tera usage |
-|---|---|---|
-| Cloudflare Workers | 100,000 requests/day, permanent free tier | trivial |
-| Vercel Hobby plan | 100GB bandwidth/month, unlimited static deploys | trivial |
-
-Ye setup Render/AWS wale se **behtar** hai kyunki: (1) koi cold-start sleep
-nahi (Workers hamesha warm hain), (2) Python container maintain nahi
-karna, (3) dono free tiers genuinely permanent hain, trial nahi.
+* Real-world hospital integration
+* Secure Aggregation
+* Homomorphic Encryption
+* Transformer-based prediction models
+* Federated XGBoost
+* Explainable AI (SHAP/LIME)
+* Cloud-native deployment
+* Integration with pharmaceutical laboratories
+* Automated hyperparameter optimization
+* Digital Twin simulation for nanoparticle formulation
 
 ---
 
-## Limitation jo yaad rakhni hai
+# Applications
 
-- Agar tera dataset mein categorical columns hain (one-hot encoded), ye
-  JS worker unhe handle nahi karta abhi — sirf numeric StandardScaler
-  path implement hai (`export_model.py` tujhe warning dega agar aisa hua).
-- XGBoost inference `reg:squarederror` objective assume karta hai (identity
-  link). Agar tune kuch aur objective use kiya tha, prediction galat aa
-  sakti hai — export script isko bhi detect karke warn karega.
-- Model bundle size: agar RF/XGBoost mein bahut zyada trees hain (300+),
-  JSON bundle bada ho sakta hai. Worker free tier 10MB tak (compressed)
-  allow karta hai — agar isse bada ho jaaye, bata dena, Worker ko
-  Cloudflare R2 se bundle fetch karne ke liye switch kar dunga.
+* AI-assisted Drug Delivery
+* Pharmaceutical Research
+* Federated Healthcare AI
+* Privacy-Preserving Machine Learning
+* Drug Formulation Optimization
+* Academic Research
+* B.Tech / M.Tech Thesis
+* AI-based Decision Support Systems
+
+---
+
+# References
+
+* McMahan et al. (2017) — Federated Learning (FedAvg)
+* Abadi et al. (2016) — Differential Privacy
+* Dwork (2006) — Differential Privacy
+* Hsu et al. (2019) — Non-IID Federated Learning
+* Grinsztajn et al. (2022) — Tree Models vs Deep Learning
+
+---
+
+# License
+
+This project is licensed under the MIT License.
+
+---
+
+# Author
+
+**Harsh Arora**
+
